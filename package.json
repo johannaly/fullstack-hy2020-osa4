@@ -14,11 +14,13 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "lodash": "^4.17.19",
     "mongoose": "^5.9.24",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
     "eslint": "^7.4.0",
+    "eslint-plugin-lodash": "^7.1.0",
     "eslint-plugin-react": "^7.20.3",
     "jest": "^26.1.0",
     "nodemon": "^2.0.4"

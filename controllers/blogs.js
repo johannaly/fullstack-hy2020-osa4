@@ -12,6 +12,14 @@ blogsRouter.post('/', async (request, response, next) => {
   if(typeof blog.likes === 'undefined') {
     blog.likes = 0
   }
+  if(typeof blog.title === 'undefined') {
+    response.status(400).send('Bad request')
+    return
+  }
+  if(typeof blog.url === 'undefined') {
+    response.status(400).send('Bad request')
+    return
+  }
 
   try {
     const savedBlog = await blog.save()

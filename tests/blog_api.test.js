@@ -84,6 +84,36 @@ test('if likes is not defined, it is zero', async () => {
   expect(likes[initialBlogs.length]) === 0
 })
 
+test('new blog without title is not accepted', async () => {
+  const newBlog = {
+    author: 'Ilkka Lehti',
+    url: 'lehti.ocm'
+  }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+
+  const response = await api.get('/api/blogs')
+  expect(response.status) === 400
+
+})
+
+test('new blog without url is not accepted', async () => {
+  const newBlog = {
+    title: 'Javascript-stuff',
+    author: 'Markku Aro'
+  }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+
+  const response = await api.get('/api/blogs')
+  expect(response.status) === 400
+
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })

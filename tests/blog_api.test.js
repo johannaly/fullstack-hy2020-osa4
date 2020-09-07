@@ -66,6 +66,24 @@ test('new blog can be added', async () => {
   expect(contents).toContain('Something totally else')
 })
 
+test('if likes is not defined, it is zero', async () => {
+  const newBlog = {
+    title: 'Above all zeros',
+    author: 'Zelda Männikkö',
+    url: 'zero.zep'
+  }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+  //console.log(response.body)
+  const likes = response.body.map(b => b.likes)
+  expect(likes[initialBlogs.length]) === 0
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })

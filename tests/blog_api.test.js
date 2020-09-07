@@ -44,7 +44,7 @@ test('blogs are returned as json', async () => {
 
 test('identity is in form id', async () => {
   const response = await api.get('/api/blogs')
-  expect(response.body.map(b => b.id)).toBeDefined
+  expect(response.body[0].id).toBeDefined()
 })
 
 

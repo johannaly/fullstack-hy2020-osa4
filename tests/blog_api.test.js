@@ -3,36 +3,22 @@ const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
+const helper = require('./test_helper')
 
-
-const initialBlogs = [
-  {
-    title: 'Help with JS',
-    author: 'Johanna L',
-    url: 'http://google.fi',
-    likes: 30
-  },
-  {
-    title: 'CSS for beginners',
-    author: 'Mark Spencer',
-    url: 'http://marks.fi',
-    likes: 45,
-  }
-]
 
 beforeEach(async () => {
   await Blog.deleteMany({})
 
-  let blogObject = new Blog(initialBlogs[0])
+  let blogObject = new Blog(helper.initialBlogs[0])
   await blogObject.save()
 
-  blogObject = new Blog(initialBlogs[1])
+  blogObject = new Blog(helper.initialBlogs[1])
   await blogObject.save()
 })
 
 test('there are two blogs', async () => {
   const response = await api.get('/api/blogs')
-  expect(response.body).toHaveLength(initialBlogs.length)
+  expect(response.body).toHaveLength(helper.initialBlogs.length)
 })
 
 test('blogs are returned as json', async () => {
@@ -62,7 +48,7 @@ test('new blog can be added', async () => {
 
   const response = await api.get('/api/blogs')
   const contents = response.body.map(b => b.title)
-  expect(response.body).toHaveLength(initialBlogs.length + 1)
+  expect(response.body).toHaveLength(helper.initialBlogs.length + 1)
   expect(contents).toContain('Something totally else')
 })
 
@@ -79,9 +65,8 @@ test('if likes is not defined, it is zero', async () => {
     .expect('Content-Type', /application\/json/)
 
   const response = await api.get('/api/blogs')
-  //console.log(response.body)
   const likes = response.body.map(b => b.likes)
-  expect(likes[initialBlogs.length]) === 0
+  expect(likes[helper.initialBlogs.length]) === 0
 })
 
 test('new blog without title is not accepted', async () => {
@@ -111,7 +96,21 @@ test('new blog without url is not accepted', async () => {
 
   const response = await api.get('/api/blogs')
   expect(response.status) === 400
+})
 
+test('blog can be deleted', async () => {
+  const blogsAtStart = await helper.blogsInDb()
+  const blogToDelete = blogsAtStart[0]
+
+  await api
+    .delete(`/api/blogs/${blogToDelete.id}`)
+    .expect(204)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
+
+  const contents = blogsAtEnd.map(b => b.title)
+  expect(contents).not.toContain(blogToDelete.title)
 })
 
 afterAll(() => {

@@ -8,12 +8,18 @@ const helper = require('./test_helper')
 
 beforeEach(async () => {
   await Blog.deleteMany({})
+  await Blog.insertMany(helper.initialBlogs)
 
-  let blogObject = new Blog(helper.initialBlogs[0])
-  await blogObject.save()
+  //const blogObjects = helper.initialBlogs
+  //.map(blog => new Blog(blog))
+  //const promiseArray = blogObjects.map(blog => blog.save())
+  //await Promise.all(promiseArray)
 
-  blogObject = new Blog(helper.initialBlogs[1])
-  await blogObject.save()
+  //let blogObject = new Blog(helper.initialBlogs[0])
+  //await blogObject.save()
+
+  //blogObject = new Blog(helper.initialBlogs[1])
+  //await blogObject.save()
 })
 
 test('there are two blogs', async () => {
@@ -111,6 +117,30 @@ test('blog can be deleted', async () => {
 
   const contents = blogsAtEnd.map(b => b.title)
   expect(contents).not.toContain(blogToDelete.title)
+})
+
+test('blog can be modified', async () => {
+  const blogsAtStart = await helper.blogsInDb()
+  const blogToModified = blogsAtStart[0]
+  //console.log(blogToModified)
+
+  const newBlog = {
+    title: blogToModified.title,
+    author: blogToModified.author,
+    url: blogToModified.url,
+    id: blogToModified.id,
+    likes: blogToModified.likes + 3
+  }
+
+  await api
+    .put(`/api/blogs/${blogToModified.id}`)
+    .send(newBlog)
+    .expect(200)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  //console.log(blogsAtEnd)
+  expect(blogsAtEnd[0].id).toContain(blogToModified.id)
+  expect(blogsAtEnd[0].likes).not.toContain(30)
 })
 
 afterAll(() => {

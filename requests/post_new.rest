@@ -2,8 +2,9 @@ POST http://localhost:3003/api/blogs
 Content-type: application/json
 
 {
-    "title": "Help with CSS",
-    "author": "Johanna K",
+    "title": "everything ok",
+    "author": "Johanna L",
     "url": "http://google.fi",
-    "likes": 32
+    "likes": 32,
+    "userId": "5f6b1ebbb8caa42e24f96069"
 }

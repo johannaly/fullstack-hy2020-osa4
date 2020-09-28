@@ -1,0 +1,9 @@
+POST http://localhost:3003/api/blogs
+Content-type: application/json
+
+{
+    "title": "onpa tää nyt",
+    "author": "Ilkka Virne",
+    "url": "hyshys.fi",
+    "likes": 2
+}

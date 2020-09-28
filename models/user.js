@@ -1,4 +1,8 @@
 const mongoose = require('mongoose')
+mongoose.set('useFindAndModify', false)
+mongoose.set('useNewUrlParser', true)
+mongoose.set('useCreateIndex', true)
+mongoose.set('useUnifiedTopology', true)
 const uniqueValidator = require('mongoose-unique-validator')
 
 const userSchema = mongoose.Schema({

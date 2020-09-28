@@ -176,29 +176,95 @@ describe('when there is initially one user at db', () => {
     const usernames = usersAtEnd.map(u => u.username)
     expect(usernames).toContain(newUser.username)
   })
+
+
+  test('creation fails with proper statuscode and message if username already taken', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'root',
+      name: 'superuser',
+      password: 'salainen'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    expect(result.body.error).toContain('`username` to be unique')
+
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+  })
+
+  test('creation fails if password is not defined', async () => {
+
+    const newUser = {
+      username: 'joolyy',
+      name: 'Johanna Lyytinen'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+
+    expect(result.body.error) === 'Password missing'
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).not.toContain(newUser)
+  })
+
+  test('creation fails if password is too short', async () => {
+    const newUser = {
+      username: 'joolyy',
+      name: 'Johanna Lyytinen',
+      password: 'jk'
+    }
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+
+    expect(result.body.error) === 'Password too short'
+    const usersAtEnd = await helper.usersInDb()
+    expect (usersAtEnd).not.toContain(newUser)
+  })
+
+  test('creation fails if username is not defined', async () => {
+    const newUser = {
+      name: 'Johanna Lyytinen',
+      password: 'sekret'
+    }
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+
+    expect(result.body.error) === 'Username missing'
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).not.toContain(newUser)
+  })
+
+  test('creation fails if username is too short', async () => {
+    const newUser = {
+      username: 'jo',
+      name: 'Johanna Lyytinen',
+      password: 'sekret'
+    }
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+
+    expect(result.body.error) === 'Username too short'
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).not.toContain(newUser)
+
+  })
+
 })
-
-test('creation fails with proper statuscode and message if usename already taken', async () => {
-  const usersAtStart = await helper.usersInDb()
-
-  const newUser = {
-    username: 'root',
-    name: 'superuser',
-    password: 'salainen'
-  }
-
-  const result = await api
-    .post('/api/users')
-    .send(newUser)
-    .expect(400)
-    .expect('Content-Type', /application\/json/)
-
-  expect(result.body.error).toContain('`username` to be unique')
-
-  const usersAtEnd = await helper.usersInDb()
-  expect(usersAtEnd).toHaveLength(usersAtStart.length)
-})
-
 afterAll(() => {
   mongoose.connection.close()
 })

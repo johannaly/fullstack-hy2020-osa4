@@ -17,10 +17,7 @@ const tokenExtractor =  (request, response, next) => {
   next()
 }
 
-
-
 const requestLogger = (request, response, next) => {
-  //logger.info('Token: ', request.tokenExtractor)
   logger.info('Method: ', request.method)
   logger.info('Path: ', request.path)
   logger.info('Body: ', request.body)

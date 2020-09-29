@@ -1,8 +1,9 @@
 POST http://localhost:3003/api/blogs 
 Content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imx5eXRpIiwiaWQiOiI1ZjcxYzI1ZmU1YTNhYzE1YjAxNjU4ZGIiLCJpYXQiOjE2MDEzNjMyNjd9.gP7Um0v6JEW-oo5VocClJs5V_b1E54HxwtyJ8gHqFXM
 
 {
-    "title": "everything ok",
+    "title": "bearer",
     "author": "Johanna L",
     "url": "http://google.fi",
     "likes": 32,

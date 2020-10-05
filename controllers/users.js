@@ -21,6 +21,8 @@ usersRouter.post('/', async (request, response) => {
     response.status(400).send('Username missing')
   } else if (body.username.length < 3) {
     response.status(400).send('Username too short')
+  } else if (await User.exists({ username: body.username })) {
+    response.status(400).send('Username must be unique')
   } else {
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(body.password, saltRounds)

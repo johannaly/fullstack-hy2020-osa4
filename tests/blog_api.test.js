@@ -12,17 +12,12 @@ const helper = require('./test_helper')
 beforeEach(async () => {
   await Blog.deleteMany({})
   await Blog.insertMany(helper.initialBlogs)
+})
 
-  //const blogObjects = helper.initialBlogs
-  //.map(blog => new Blog(blog))
-  //const promiseArray = blogObjects.map(blog => blog.save())
-  //await Promise.all(promiseArray)
-
-  //let blogObject = new Blog(helper.initialBlogs[0])
-  //await blogObject.save()
-
-  //blogObject = new Blog(helper.initialBlogs[1])
-  //await blogObject.save()
+beforeEach(async () => {
+  await User.deleteMany({})
+  const user = new User({ _id: '5f7450dc9e209b21589abbc0', username: 'root', name: 'root', password: 'sekret' })
+  await user.save()
 })
 
 test('there are two blogs', async () => {
@@ -43,14 +38,18 @@ test('identity is in form id', async () => {
 })
 
 test('new blog can be added', async () => {
+
   const newBlog = {
     title: 'Something totally else',
     author: 'Liisa Liisanen',
     url: 'something.else',
-    likes:3
+    likes:3,
+    userId: '5f7450dc9e209b21589abbc0'
   }
+
   await api
     .post('/api/blogs')
+    .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjVmNzQ1MGRjOWUyMDliMjE1ODlhYmJjMCIsImlhdCI6MTYwMTQ2MDY0OX0.k_czMgXwYspFcMx6uNT83cL61NeRMUtpSJl9fYHNAn4')
     .send(newBlog)
     .expect(200)
     .expect('Content-Type', /application\/json/)
@@ -61,14 +60,37 @@ test('new blog can be added', async () => {
   expect(contents).toContain('Something totally else')
 })
 
+test('new blog cannot be added without token', async () => {
+
+  const newBlog = {
+    title: 'Something totally else',
+    author: 'Liisa Liisanen',
+    url: 'something.else',
+    likes:3,
+    userId: '5f7450dc9e209b21589abbc0'
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(401)
+
+  const response = await api.get('/api/blogs')
+  expect(response.status) === 400
+  expect(response.body.error) === 'Unauthorized'
+})
+
 test('if likes is not defined, it is zero', async () => {
   const newBlog = {
     title: 'Above all zeros',
     author: 'Zelda Männikkö',
-    url: 'zero.zep'
+    url: 'zero.zep',
+    userId: '5f7450dc9e209b21589abbc0'
   }
+
   await api
     .post('/api/blogs')
+    .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjVmNzQ1MGRjOWUyMDliMjE1ODlhYmJjMCIsImlhdCI6MTYwMTQ2MDY0OX0.k_czMgXwYspFcMx6uNT83cL61NeRMUtpSJl9fYHNAn4')
     .send(newBlog)
     .expect(200)
     .expect('Content-Type', /application\/json/)
@@ -81,25 +103,29 @@ test('if likes is not defined, it is zero', async () => {
 test('new blog without title is not accepted', async () => {
   const newBlog = {
     author: 'Ilkka Lehti',
-    url: 'lehti.ocm'
+    url: 'lehti.ocm',
+    userId: '5f7450dc9e209b21589abbc0'
   }
+
   await api
     .post('/api/blogs')
+    .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjVmNzQ1MGRjOWUyMDliMjE1ODlhYmJjMCIsImlhdCI6MTYwMTQ2MDY0OX0.k_czMgXwYspFcMx6uNT83cL61NeRMUtpSJl9fYHNAn4')
     .send(newBlog)
     .expect(400)
 
   const response = await api.get('/api/blogs')
   expect(response.status) === 400
-
 })
 
 test('new blog without url is not accepted', async () => {
   const newBlog = {
     title: 'Javascript-stuff',
-    author: 'Markku Aro'
+    author: 'Markku Aro',
+    userId: '5f7450dc9e209b21589abbc0'
   }
   await api
     .post('/api/blogs')
+    .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjVmNzQ1MGRjOWUyMDliMjE1ODlhYmJjMCIsImlhdCI6MTYwMTQ2MDY0OX0.k_czMgXwYspFcMx6uNT83cL61NeRMUtpSJl9fYHNAn4')
     .send(newBlog)
     .expect(400)
 
@@ -109,12 +135,16 @@ test('new blog without url is not accepted', async () => {
 
 test('blog can be deleted', async () => {
   const blogsAtStart = await helper.blogsInDb()
+  //console.log(blogsAtStart)
   const blogToDelete = blogsAtStart[0]
+  //console.log(blogToDelete.id)
 
-  await api
-    .delete(`/api/blogs/${blogToDelete.id}`)
-    .expect(204)
-
+  if(blogToDelete.user.id.toString() === '5f7450dc9e209b21589abbc0') {
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjVmNzQ1MGRjOWUyMDliMjE1ODlhYmJjMCIsImlhdCI6MTYwMTQ2MDY0OX0.k_czMgXwYspFcMx6uNT83cL61NeRMUtpSJl9fYHNAn4')
+      .expect(204)
+  }
   const blogsAtEnd = await helper.blogsInDb()
   expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
 
@@ -191,9 +221,8 @@ describe('when there is initially one user at db', () => {
       .post('/api/users')
       .send(newUser)
       .expect(400)
-      .expect('Content-Type', /application\/json/)
 
-    expect(result.body.error).toContain('`username` to be unique')
+    expect(result.body.error) === 'Username must be unique'
 
     const usersAtEnd = await helper.usersInDb()
     expect(usersAtEnd).toHaveLength(usersAtStart.length)

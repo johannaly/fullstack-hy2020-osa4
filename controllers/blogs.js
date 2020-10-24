@@ -19,18 +19,19 @@ blogsRouter.get('/:id', async (request, response) => {
 
 blogsRouter.post('/', async (request, response) => {
   const body = request.body
+  console.log(body)
   const decodedToken = response.locals.token
-  if(decodedToken != null) {
+  if(decodedToken !== null) {
     const user = await User.findById(decodedToken.id)
 
     if(typeof body.likes === 'undefined') {
       body.likes = 0
     }
-    if(typeof body.title === 'undefined') {
+    if(typeof body.title === 'undefined' || body.title === '') {
       response.status(400).send('Bad request')
       return
     }
-    if(typeof body.url === 'undefined') {
+    if(typeof body.url === 'undefined' || body.url === '') {
       response.status(400).send('Bad request')
       return
     }
